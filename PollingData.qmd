@@ -8,6 +8,12 @@ page-layout: full
 link-citations: true
 ---
 
+## Introduction
+
+The job guarantee is widely supported across political ideologies, races, genders, and locations. Typically divisive ethical and political issues around neoliberalism, socialism, and public policy are bypassed around the question of whether a job guarantee program is favorable. The job guarantee program is a populist and reformist policy movement, that is not partisan or targeted for the advancement of one group at the expense of another. The job guarantee program provides equal access to employment for all people, providing the opportunity for economic mobility regardless of identity. This avenue through which social inequity is addressed is broadly appealing because redistribution politics are not in question. The criticisms of direct cash transfer government benefits are not applicable to a job guarantee because the employment of labor that is not typically utilized generates productivity, contributing to the growth of the economy. The aggregate economic goals that are achieved through the jobs guarantee are beneficial to people of all backgrounds and socioeconomic positions.
+
+Support for the job guarantee has been measured through various polls, conducted in several different countries. The polls used for this paper are a Hill-Harris survey conducted in 2020, a YouGov UK poll conducted in the same year, and a French survey from 2021 by Opinionway and Institut Rousseau. All of these studies illustrate the overwhelming support for the job guarantee, and demonstrate that a diverse collection of social groups and identity categories are at least receptive, and substantially in favor of, a publicly funded jobs guarantee program.
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 library(readxl)
@@ -42,7 +48,7 @@ politicalParty2 <- politicalParty2 |> filter(Position != "Strongly support") |>
   filter(Position != "Somewhat oppose")
 ```
 
-The United States
+## The United States
 
 In a survey conducted by Hill-HarrisX among 933 registered voters, respondents were asked whether or not they support a federally funded job guarantee.
 
@@ -312,7 +318,7 @@ ggplot (regionUSA, aes(y=Percentage, x=Region, fill=Position)) +
   theme_minimal()
 ```
 
-The United Kingdom
+## The United Kingdom
 
 This poll conducted by YouGov and Neon in Great Britain on April 16-17 of 2020 asked respondents the following question: **Thinking about the financial impact of a crisis like the Coronavirus pandemic, to what extent, if at all, would you support or oppose the government introducing the following permanent measure?** **A job guarantee - where the government makes sure everyone who can work has a job.** It surveyed 2,015 people, finding majority support for the JG in all categories of gender, age, region, and political affiliation. The poll also asked the same question about the Universal Basic Income policy proposal, which garnered less support.
 
@@ -552,7 +558,7 @@ ggplot(aes(y = Region, x = n, fill = Position)) +
 
 Support for the job guarantee dominates in all regions. The opinions across different geographical zones of the UK do not vary greatly. The greatest level of support is in Scotland at 74% and the lowest is in London at 65%. Only 9% of Londoners are against the job guarantee, and 8% of the Scotland sample oppose it.
 
-France
+## France
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
