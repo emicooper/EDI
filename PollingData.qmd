@@ -14,6 +14,22 @@ The job guarantee is widely supported across political ideologies, races, gender
 
 Support for the job guarantee has been measured through various polls, conducted in several different countries. The polls used for this paper are a Hill-Harris survey conducted in 2020, a YouGov UK poll conducted in the same year, and a French survey from 2021 by Opinionway and Institut Rousseau. All of these studies illustrate the overwhelming support for the job guarantee, and demonstrate that a diverse collection of social groups and identity categories are at least receptive, and substantially in favor of, a publicly funded jobs guarantee program.
 
+## The United States
+
+In a survey conducted by Hill-HarrisX among 933 registered voters, respondents were asked whether or not they support a federally funded job guarantee.
+
+This survey was conducted online within the United States from July 3-4, 2020 among 933 registered voters by HarrisX. The sampling margin of error of this poll is plus or minus 3.2 percentage points. The results reflect a nationally representative sample of registered voters. Results were weighted for age within gender, region, race/ethnicity, income, political party, and education where necessary to align them with their actual proportions in the population.
+
+## The United Kingdom
+
+This poll conducted by YouGov and Neon in Great Britain on April 16-17 of 2020 asked respondents the following question: **Thinking about the financial impact of a crisis like the Coronavirus pandemic, to what extent, if at all, would you support or oppose the government introducing the following permanent measure?** **A job guarantee - where the government makes sure everyone who can work has a job.** It surveyed 2,015 people, finding majority support for the JG in all categories of gender, age, region, and political affiliation. The poll also asked the same question about the Universal Basic Income policy proposal, which garnered less support.
+
+## France
+
+This survey from Opinionway and Institut Rousseau with a sample size of 1,011 asked whether respondents would support a job guarantee in the ecological sector with data by gender, age, region, and population density. It found majority support for the job guarantee across all the tested demographic groups.
+
+## Politics
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 library(readxl)
@@ -26,9 +42,17 @@ library(ggridges)
 
 Hill <- read_excel("~/Rstudio/EDI/pollingEDI/pollingHH2020Emi.xlsx")
 
+
+library(janitor)
+
+francePoll <-read_excel("~/Rstudio/EDI/pollingEDI/France2021Poll.xlsx")
+francePoll <- clean_names(francePoll)
+
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+#US POLITICS
 
  politicalParty <- Hill |> select(Republican, Democrat, Independent, Position) |> pivot_longer(!Position,
   names_to = "Party",
@@ -48,14 +72,6 @@ politicalParty2 <- politicalParty2 |> filter(Position != "Strongly support") |>
   filter(Position != "Somewhat oppose")
 ```
 
-## The United States
-
-In a survey conducted by Hill-HarrisX among 933 registered voters, respondents were asked whether or not they support a federally funded job guarantee.
-
-This survey was conducted online within the United States from July 3-4, 2020 among 933 registered voters by HarrisX. The sampling margin of error of this poll is plus or minus 3.2 percentage points. The results reflect a nationally representative sample of registered voters. Results were weighted for age within gender, region, race/ethnicity, income, political party, and education where necessary to align them with their actual proportions in the population.
-
-The proportions of the sample population that supported, opposed, or were unsure of the job guarantee are displayed below.
-
 ```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
  ggplot(politicalParty2, aes(y = Party, x = n, fill = Position)) + 
    geom_col(position = "fill")+
@@ -65,22 +81,128 @@ The proportions of the sample population that supported, opposed, or were unsure
        x = "Proportion", y = "Party")
 ```
 
-Political Party
-
 ```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
+
+  ggplot(politicalPartyUK, aes(x = Party, y = Percentage, fill = Party)) +
+  geom_col() +
+  facet_wrap(~Position, nrow = 2) +
+  guides(fill = "none") +
+  labs(title = "What do UK political parties think of the Job Guarantee?",
+       subtitle = "UKYouGov Survey",
+       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
+       x = NULL, y = NULL) +
+    theme_minimal()
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+#UK POLITICS
+
+UKYouGov <- read_excel("~/Rstudio/EDI/pollingEDI/pollingUKEmi2020.xlsx")
+
+UKYouGov <- UKYouGov |> 
+  mutate(Total = Total*.01) |> 
+  mutate(Conservative = Conservative*.01) |> 
+  mutate(Labor = Labor*.01) |> 
+  mutate(`Liberal Democrat` = `Liberal Democrat`*.01) |> 
+  mutate(Remain = Remain*.01) |> 
+  mutate(Leave = Leave*.01) |> 
+  mutate(Male = Male*.01) |> 
+  mutate(Female = Female*.01) |> 
+  mutate(`18-24` = `18-24`*.01) |> 
+  mutate(`25-49` = `25-49`*.01) |> 
+  mutate(`50-64` = `50-64`*.01) |> 
+  mutate(`65+` = `65+`*.01) |> 
+  mutate(ABC1 = ABC1*.01) |> 
+  mutate(C2DE = C2DE*.01) |> 
+  mutate(London = London*.01) |> 
+  mutate(`Rest of South` = `Rest of South`*.01) |> 
+  mutate(`Midlands/Wales` = `Midlands/Wales`*.01) |> 
+  mutate(North = North*.01) |> 
+  mutate(Scotland = Scotland*.01)
+
+politicalPartyUK <- UKYouGov |> select("Conservative", "Labor", "Liberal Democrat", "Position") |> pivot_longer(!Position,
+  names_to = "Party",
+  values_to = "Percentage"
+)
+
+politicalPartyUK <- politicalPartyUK |>
+  mutate(n = 
+           case_when(Party == "Labor" ~ Percentage*500,
+                     Party == "Conservative" ~ Percentage*683,
+                     Party == "Liberal Democrat" ~ Percentage*181))
+
+
+politicalPartyUK <- politicalPartyUK |> filter(Position != "Very Supportive") |>
+  filter(Position != "Supportive") |>
+  filter(Position != "Unsupportive") |>
+  filter(Position != "Very unsupportive")
+
+```
+
+The respondents belonging to the Conservative and Labor parties had the highest level of support at 73%, compared to Liberal Democrats of which only 65% support the job guarantee. 8% of the Conservative sample group are un-supportive of the job guarantee, compared to 6% of Labor and 11% of Liberal Democrats.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ggplot (politicalPartyUK, aes(x=Party, y=Percentage, fill=Position)) + 
+  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
+  labs(title = "What do UK political parties think of the Job Guarantee?",
+       subtitle = "UKYouGov Survey",
+       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
+       x = NULL, y = NULL) +
+  scale_fill_manual(values = c(
+    "Don't know" = "gray",
+    "Neither supportive or unsupportive" = "black",
+    "Total Supportive" = "#5F8575",
+    "Total unsupportive" = "#C21E56"
+  )) +
+  theme_minimal()
+
+politicalPartyUK |>
+  mutate(Position = 
+  case_when(
+    Position == "Neither supportive or unsupportive" ~ "Neutral/Don't Know",
+    Position == "Don't know" ~ "Neutral/Don't Know",
+    .default = Position
+            )) |>
+  ggplot(aes(y = Party, x = n, fill = Position)) + 
+  geom_col(position = "fill")+
+  labs(title = "What do UK political parties think of the Job Guarantee?",
+       subtitle = "UKYouGov Survey",
+       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
+       x = "Proportion", y = "Party") +
+   scale_fill_manual(values = c( 
+    "Total unsupportive" = "#C21E56", 
+    "Total Supportive" = "#5F8575", 
+    "Neutral/Don't Know" = "gray" 
+   )) +
+  theme_minimal()
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 ggplot(politicalParty2, aes(y = Party, x = n, fill = Position)) + 
   geom_col(position = "fill")+
   labs(title = "What do parties think of the Job Guarantee?",
        subtitle = "Harris and Hill Survey",
        caption = "The Hill-HarrisX Daily Poll. 2020. Federal Jobs Program.",
-       x = "Proportion", y = "Party")
-
+       x = "Proportion", y = "Party") +
+  scale_fill_manual(values = c( 
+    "NET OPPOSE" = "#D2042D", 
+    "NET SUPPORT" = "#0066b2", 
+    "Unsure" = "gray" 
+  )) +
+  theme_minimal()
 ```
 
 The support, opposition, and uncertainty of the job guarantee are different across political parties. While the majority of all parties support the job guarantee, Democrats have the most support at 89%, Republicans have the most opposition at 14%, and Independents are the most unsure at 17%.
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+#US POLITICS
+
 ggplot(politicalParty2, aes(x = Party, y = Percentage, fill = Party)) +
   geom_col() +
   facet_wrap(~Position, nrow = 1, labeller = label_wrap_gen(width = 12)) +
@@ -90,8 +212,8 @@ ggplot(politicalParty2, aes(x = Party, y = Percentage, fill = Party)) +
        caption = "The Hill-HarrisX Daily Poll. 2020. Federal Jobs Program.",
        x = NULL, y = NULL) +
   scale_fill_manual(values = c( 
-    "Republican" = "red", 
-    "Democrat" = "blue", 
+    "Republican" = "#D2042D", 
+    "Democrat" = "#0066b2", 
     "Independent" = "gray" 
   )) +
   theme_minimal()
@@ -104,6 +226,38 @@ ggplot (politicalParty2, aes(x=Party, y=Percentage, fill=Position)) +
        x = NULL, y = NULL) +
   scale_fill_manual(values = c( 
     "NET OPPOSE" = "#D2042D", 
+    "NET SUPPORT" = "#0066b2", 
+    "Unsure" = "gray" 
+  )) +
+  guides(fill = "none") +
+  theme_minimal()
+```
+
+## Region
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+#REGION USA
+
+regionUSA <- Hill |> select(Northeast, South, Midwest, West, Position) |> 
+  pivot_longer(!Position,
+  names_to = "Region",
+  values_to = "Percentage"
+)
+
+regionUSA <- regionUSA |> filter(Position != "Strongly support") |>
+  filter(Position != "Somewhat support") |>
+  filter(Position != "Strongly oppose") |>
+  filter(Position != "Somewhat oppose")
+
+ggplot (regionUSA, aes(y=Percentage, x=Region, fill=Position)) + 
+  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
+  labs(title = "Regional Breakdown",
+       subtitle = "Harris and Hill Survey",
+       caption = "The Hill-HarrisX Daily Poll. 2020. Federal Jobs Program.",
+       x =NULL, y = NULL) +
+  scale_fill_manual(values = c( 
+    "NET OPPOSE" = "#D2042D", 
     "NET SUPPORT" = "#50C878", 
     "Unsure" = "gray" 
   )) +
@@ -111,7 +265,130 @@ ggplot (politicalParty2, aes(x=Party, y=Percentage, fill=Position)) +
   theme_minimal()
 ```
 
-Education
+Support for the job guarantee dominates in all regions. The opinions across different geographical zones of the UK do not vary greatly. The greatest level of support is in Scotland at 74% and the lowest is in London at 65%. Only 9% of Londoners are against the job guarantee, and 8% of the Scotland sample oppose it.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+#REGION UK
+
+regionUK <- UKYouGov |> select("London", "Rest of South", "Midlands/Wales", 
+                               "North", "Scotland", "Position") |> 
+  pivot_longer(!Position,
+  names_to = "Region",
+  values_to = "Percentage"
+)
+
+regionUK <- regionUK |>
+  mutate(n = 
+           case_when(Region == "London" ~ Percentage*242,
+                     Region == "Rest of South" ~ Percentage*677,
+                     Region == "Midlands/Wales" ~ Percentage*437,
+                     Region == "North" ~ Percentage*486,
+                     Region == "Scotland" ~ Percentage*173
+                    ))
+
+regionUK <- regionUK |> filter(Position != "Very Supportive") |>
+  filter(Position != "Supportive") |>
+  filter(Position != "Unsupportive") |>
+  filter(Position != "Very unsupportive")
+
+regionUK |>
+  mutate(Position = 
+  case_when(
+    Position == "Neither supportive or unsupportive" ~ "Neutral/Don't Know",
+    Position == "Don't know" ~ "Neutral/Don't Know",
+    .default = Position
+            )) |>
+  ggplot(aes(y = Position, x = Percentage, fill = Position)) +
+  geom_col() +
+  facet_wrap(~Region, nrow = 2, labeller = label_wrap_gen(width = 12)) +
+  guides(fill = "none") +
+  labs(title = "What do UK regions think of the job guarantee?",
+       subtitle = "YouGov Survey Results, 2020",
+       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
+       x = "Percentage", y = NULL) +
+  scale_fill_manual(values = c(
+    "Total unsupportive" = "#ef8a62", 
+    "Total Supportive" = "#67a9cf",
+    "Neutral/Don't Know" = "gray"
+  )) +
+  theme_minimal()
+
+ggplot (regionUK, aes(x = Region, y = Percentage, fill=Position)) + 
+  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
+  labs(title = "What do UK regions think of the job guarantee?",
+       subtitle = "YouGov Survey Results, 2020",
+       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
+       x = NULL, y = NULL) +
+  theme_minimal()
+```
+
+All regions support the job guarantee at high levels, between 79% and 82%. The most opposition was in the Île-de-France at 20%.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+#REGION FRANCE
+
+frenchRegion <- francePoll |> select(paris, ile_de_france, province, nord_ouest,
+                nord_est, sud_ouest, sud_est, position) |> 
+  pivot_longer(!position,
+  names_to = "Region",
+  values_to = "Percentage"
+)
+
+frenchRegion <- frenchRegion |>
+  mutate(n = 
+           case_when(Region == "paris" ~ Percentage*42,
+                     Region == "ile_de_france" ~ Percentage*186,
+                     Region == "province" ~ Percentage*825,
+                     Region == "nord_ouest" ~ Percentage*230,
+                     Region == "nord_est" ~ Percentage*226,
+                     Region == "sud_ouest" ~ Percentage*114,
+                     Region == "sud_est" ~ Percentage*254
+                    ))
+
+frenchRegion <- frenchRegion |>
+  mutate(Region =
+           case_when(Region == "paris" ~ "Paris",
+                     Region == "ile_de_france" ~ "Ile-de-France -",
+                     Region == "province" ~ "Province",
+                     Region == "nord_ouest" ~ "Nord Ouest",
+                     Region == "nord_est" ~ "Nord Est",
+                     Region == "sud_ouest" ~ "Sud Ouest",
+                     Region == "sud_est" ~ "Sud Est"
+           ))
+
+frenchRegion <- frenchRegion |> filter(position != "Somewhat in favor") |>
+  filter(position != "quite in favor") |>
+  filter(position != "Somewhat opposed") |>
+  filter(position != "quite opposed")
+
+
+ggplot(frenchRegion, aes(y = position, x = Percentage, fill = position)) +
+  geom_col() +
+  facet_wrap(~Region, nrow = 2, labeller = label_wrap_gen(width = 12)) +
+  guides(fill = "none") +
+  labs(title = "What do French regions think of the job guarantee?",
+       subtitle = "French poll",
+       caption = "OpinionWay and Institut Rousseau. March 2021. Survey Results. France",
+       x = "Percentage", y = NULL) +
+  scale_fill_manual(values = c(
+    "Total opposed" = "#ef8a62", 
+    "Total in favor" = "#67a9cf",
+    "No response" = "gray"
+  )) +
+  theme_minimal()
+
+ggplot (frenchRegion, aes(y=Percentage, x=Region, fill=position)) + 
+  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
+  labs(title = "What do French regions think of the job guarantee?",
+       subtitle = "French poll",
+       caption = "OpinionWay and Institut Rousseau. March 2021. Survey Results. France",
+       x = "Percentage", y = NULL) +
+  theme_minimal()
+```
+
+## Education
 
 The sample population grouped by education level was divided between people with less than 4 years of college and those with at least 4 years of college.
 
@@ -172,7 +449,7 @@ ggplot(education,
   facet_wrap(~Position, labeller = label_wrap_gen(width = 12))
 ```
 
-Income
+## Income
 
 People earning less than \$75K and people earning at least \$75K per year are compared in these graphs.
 
@@ -226,7 +503,7 @@ income2 <- income |> filter(Position != "Strongly support") |>
 
 13% of higher earners, compared to 8% of lower earners oppose the job guarantee. 82% of those earning less than \$75K and 77% of those earning at least \$75K support the job guarantee.
 
-Race
+## Race
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -285,134 +562,12 @@ ggplot(race2, aes(y = Race, x = n, fill = Position)) +
 
 The Black sample population has the highest level of support for the job guarantee at 84%, while the Hispanic segment of the sample supports it the least at 74%.
 
-Region
-
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-regionUSA <- Hill |> select(Northeast, South, Midwest, West, Position) |> 
-  pivot_longer(!Position,
-  names_to = "Region",
-  values_to = "Percentage"
-)
-
-regionUSA <- regionUSA |> filter(Position != "Strongly support") |>
-  filter(Position != "Somewhat support") |>
-  filter(Position != "Strongly oppose") |>
-  filter(Position != "Somewhat oppose")
-```
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-ggplot (regionUSA, aes(y=Percentage, x=Region, fill=Position)) + 
-  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
-  labs(title = "Regional Breakdown",
-       subtitle = "Harris and Hill Survey",
-       caption = "The Hill-HarrisX Daily Poll. 2020. Federal Jobs Program.",
-       x =NULL, y = NULL) +
-  scale_fill_manual(values = c( 
-    "NET OPPOSE" = "#D2042D", 
-    "NET SUPPORT" = "#50C878", 
-    "Unsure" = "gray" 
-  )) +
-  guides(fill = "none") +
-  theme_minimal()
-```
-
-## The United Kingdom
-
-This poll conducted by YouGov and Neon in Great Britain on April 16-17 of 2020 asked respondents the following question: **Thinking about the financial impact of a crisis like the Coronavirus pandemic, to what extent, if at all, would you support or oppose the government introducing the following permanent measure?** **A job guarantee - where the government makes sure everyone who can work has a job.** It surveyed 2,015 people, finding majority support for the JG in all categories of gender, age, region, and political affiliation. The poll also asked the same question about the Universal Basic Income policy proposal, which garnered less support.
-
-Political Party
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-UKYouGov <- read_excel("~/Rstudio/EDI/pollingEDI/pollingUKEmi2020.xlsx")
-
-UKYouGov <- UKYouGov |> 
-  mutate(Total = Total*.01) |> 
-  mutate(Conservative = Conservative*.01) |> 
-  mutate(Labor = Labor*.01) |> 
-  mutate(`Liberal Democrat` = `Liberal Democrat`*.01) |> 
-  mutate(Remain = Remain*.01) |> 
-  mutate(Leave = Leave*.01) |> 
-  mutate(Male = Male*.01) |> 
-  mutate(Female = Female*.01) |> 
-  mutate(`18-24` = `18-24`*.01) |> 
-  mutate(`25-49` = `25-49`*.01) |> 
-  mutate(`50-64` = `50-64`*.01) |> 
-  mutate(`65+` = `65+`*.01) |> 
-  mutate(ABC1 = ABC1*.01) |> 
-  mutate(C2DE = C2DE*.01) |> 
-  mutate(London = London*.01) |> 
-  mutate(`Rest of South` = `Rest of South`*.01) |> 
-  mutate(`Midlands/Wales` = `Midlands/Wales`*.01) |> 
-  mutate(North = North*.01) |> 
-  mutate(Scotland = Scotland*.01)
-```
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-politicalPartyUK <- UKYouGov |> select("Conservative", "Labor", "Liberal Democrat", "Position") |> pivot_longer(!Position,
-  names_to = "Party",
-  values_to = "Percentage"
-)
-
-politicalPartyUK <- politicalPartyUK |>
-  mutate(n = 
-           case_when(Party == "Labor" ~ Percentage*500,
-                     Party == "Conservative" ~ Percentage*683,
-                     Party == "Liberal Democrat" ~ Percentage*181))
-
-
-politicalPartyUK <- politicalPartyUK |> filter(Position != "Very Supportive") |>
-  filter(Position != "Supportive") |>
-  filter(Position != "Unsupportive") |>
-  filter(Position != "Very unsupportive")
-```
-
-The respondents belonging to the Conservative and Labor parties had the highest level of support at 73%, compared to Liberal Democrats of which only 65% support the job guarantee. 8% of the Conservative sample group are un-supportive of the job guarantee, compared to 6% of Labor and 11% of Liberal Democrats.
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-ggplot (politicalPartyUK, aes(x=Party, y=Percentage, fill=Position)) + 
-  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
-  labs(title = "What do UK political parties think of the Job Guarantee?",
-       subtitle = "UKYouGov Survey",
-       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
-       x = NULL, y = NULL) +
-  theme_minimal()
-
-  ggplot(politicalPartyUK, aes(x = Party, y = Percentage, fill = Party)) +
-  geom_col() +
-  facet_wrap(~Position, nrow = 2) +
-  guides(fill = "none") +
-  labs(title = "What do UK political parties think of the Job Guarantee?",
-       subtitle = "UKYouGov Survey",
-       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
-       x = NULL, y = NULL) +
-    theme_minimal()
 
 ```
 
-```{r eval=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
-
-politicalPartyUK |>
-  mutate(Position = 
-  case_when(
-    Position == "Neither supportive or unsupportive" ~ "Neutral/Don't Know",
-    Position == "Don't know" ~ "Neutral/Don't Know",
-    .default = Position
-            )) |>
-  ggplot(aes(y = Party, x = n, fill = Position)) + 
-  geom_col(position = "fill")+
-  labs(title = "What do UK political parties think of the Job Guarantee?",
-       subtitle = "UKYouGov Survey",
-       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
-       x = "Proportion", y = "Party") +
-  theme_minimal()
-```
-
-Brexit
+## Brexit
 
 The survey results are also diagregated between respondents who believe the UK should have left the EU and those who believe that the UK should not have left the EU.
 
@@ -483,94 +638,39 @@ ggplot(aes(y = Opinion, x = n, fill = Position)) +
 
 People in the sample who believe that the UK should have left the EU were more supportive of the job guarantee at 74% support. The people who believe the UK should have remained in the EU oppose the job guarantee at 9%, 3% higher than the 'leave' camp.
 
-Region
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-regionUK <- UKYouGov |> select("London", "Rest of South", "Midlands/Wales", 
-                               "North", "Scotland", "Position") |> 
-  pivot_longer(!Position,
-  names_to = "Region",
-  values_to = "Percentage"
-)
+```
 
-regionUK <- regionUK |>
-  mutate(n = 
-           case_when(Region == "London" ~ Percentage*242,
-                     Region == "Rest of South" ~ Percentage*677,
-                     Region == "Midlands/Wales" ~ Percentage*437,
-                     Region == "North" ~ Percentage*486,
-                     Region == "Scotland" ~ Percentage*173
-                    ))
-
-regionUK <- regionUK |> filter(Position != "Very Supportive") |>
-  filter(Position != "Supportive") |>
-  filter(Position != "Unsupportive") |>
-  filter(Position != "Very unsupportive")
+```{r echo=FALSE, warning=FALSE, message=FALSE}
 
 regionUK |>
   mutate(Position = 
   case_when(
     Position == "Neither supportive or unsupportive" ~ "Neutral/Don't Know",
     Position == "Don't know" ~ "Neutral/Don't Know",
+    Position == "Total unsupportive" ~ "Total Unsupportive",
     .default = Position
             )) |>
-  ggplot(aes(y = Position, x = Percentage, fill = Position)) +
-  geom_col() +
-  facet_wrap(~Region, nrow = 2, labeller = label_wrap_gen(width = 12)) +
-  guides(fill = "none") +
-  labs(title = "What do UK regions think of the job guarantee?",
-       subtitle = "YouGov Survey Results, 2020",
-       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
-       x = "Percentage", y = NULL) +
-  scale_fill_manual(values = c(
-    "Total unsupportive" = "#ef8a62", 
-    "Total Supportive" = "#67a9cf",
-    "Neutral/Don't Know" = "gray"
+ggplot(aes(y = Region, x = n, fill = Position)) + 
+   geom_col(position = "fill") +
+  scale_fill_manual(values = c( 
+    "Neutral/Don't Know" = "gray", 
+    "Total Supportive" = "#2E8B57", 
+    "Total Unsupportive" = "#D2042D" 
   )) +
   theme_minimal()
 ```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
-ggplot (regionUK, aes(x = Region, y = Percentage, fill=Position)) + 
-  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
-  labs(title = "What do UK regions think of the job guarantee?",
-       subtitle = "YouGov Survey Results, 2020",
-       caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
-       x = NULL, y = NULL) +
-  theme_minimal()
 ```
 
-```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
-
-regionUK |>
-  mutate(Position = 
-  case_when(
-    Position == "Neither supportive or unsupportive" ~ "Neutral/Don't Know",
-    Position == "Don't know" ~ "Neutral/Don't Know",
-    .default = Position
-            )) |>
-ggplot(aes(y = Region, x = n, fill = Position)) + 
-   geom_col(position = "fill") +
-  theme_minimal()
-```
-
-Support for the job guarantee dominates in all regions. The opinions across different geographical zones of the UK do not vary greatly. The greatest level of support is in Scotland at 74% and the lowest is in London at 65%. Only 9% of Londoners are against the job guarantee, and 8% of the Scotland sample oppose it.
-
-## France
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-library(janitor)
-
-francePoll <-read_excel("~/Rstudio/EDI/pollingEDI/France2021Poll.xlsx")
-francePoll <- clean_names(francePoll)
-```
-
-This survey from Opinionway and Institut Rousseau with a sample size of 1,011 asked whether respondents would support a job guarantee in the ecological sector with data by gender, age, region, and population density. It found majority support for the job guarantee across all the tested demographic groups.
-
-Gender
+## Gender
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -674,74 +774,6 @@ franceCSP <- franceCSP |> filter(position != "Somewhat in favor") |>
     theme_minimal()
 ```
 
-Region
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-frenchRegion <- francePoll |> select(paris, ile_de_france, province, nord_ouest,
-                nord_est, sud_ouest, sud_est, position) |> 
-  pivot_longer(!position,
-  names_to = "Region",
-  values_to = "Percentage"
-)
-
-frenchRegion <- frenchRegion |>
-  mutate(n = 
-           case_when(Region == "paris" ~ Percentage*42,
-                     Region == "ile_de_france" ~ Percentage*186,
-                     Region == "province" ~ Percentage*825,
-                     Region == "nord_ouest" ~ Percentage*230,
-                     Region == "nord_est" ~ Percentage*226,
-                     Region == "sud_ouest" ~ Percentage*114,
-                     Region == "sud_est" ~ Percentage*254
-                    ))
-
-frenchRegion <- frenchRegion |>
-  mutate(Region =
-           case_when(Region == "paris" ~ "Paris",
-                     Region == "ile_de_france" ~ "Ile-de-France -",
-                     Region == "province" ~ "Province",
-                     Region == "nord_ouest" ~ "Nord Ouest",
-                     Region == "nord_est" ~ "Nord Est",
-                     Region == "sud_ouest" ~ "Sud Ouest",
-                     Region == "sud_est" ~ "Sud Est"
-           ))
-
-frenchRegion <- frenchRegion |> filter(position != "Somewhat in favor") |>
-  filter(position != "quite in favor") |>
-  filter(position != "Somewhat opposed") |>
-  filter(position != "quite opposed")
-
-
-ggplot(frenchRegion, aes(y = position, x = Percentage, fill = position)) +
-  geom_col() +
-  facet_wrap(~Region, nrow = 2, labeller = label_wrap_gen(width = 12)) +
-  guides(fill = "none") +
-  labs(title = "What do French regions think of the job guarantee?",
-       subtitle = "French poll",
-       caption = "OpinionWay and Institut Rousseau. March 2021. Survey Results. France",
-       x = "Percentage", y = NULL) +
-  scale_fill_manual(values = c(
-    "Total opposed" = "#ef8a62", 
-    "Total in favor" = "#67a9cf",
-    "No response" = "gray"
-  )) +
-  theme_minimal()
-
-```
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-ggplot (frenchRegion, aes(y=Percentage, x=Region, fill=position)) + 
-  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
-  labs(title = "What do French regions think of the job guarantee?",
-       subtitle = "French poll",
-       caption = "OpinionWay and Institut Rousseau. March 2021. Survey Results. France",
-       x = "Percentage", y = NULL) +
-  theme_minimal()
-
-```
-
 ```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
 
 ggplot(frenchRegion, aes(y = Region, x = n, fill = position)) + 
@@ -749,9 +781,7 @@ ggplot(frenchRegion, aes(y = Region, x = n, fill = position)) +
 
 ```
 
-All regions support the job guarantee at high levels, between 79% and 82%. The most opposition was in the Île-de-France at 20%.
-
-Communities: Rural, Suburban, and Urban
+## Communities: Rural, Suburban, and Urban
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
