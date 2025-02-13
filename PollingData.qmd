@@ -726,6 +726,80 @@ ggplot(franceGender, aes(y = Gender, x = n, fill = position)) +
 
 ```
 
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+genderUS <- Hill |> select(Male, Female, Position) |> 
+  filter(Position != "Strongly support") |>
+  filter(Position != "Somewhat support") |>
+  filter(Position != "Somewhat oppose") |>
+  filter(Position != "Strongly oppose") |>
+  mutate(Position = case_when(
+    Position == "NET SUPPORT" ~ "Total Supportive",
+    Position == "Unsure" ~ "Neutral/Don't Know",
+    Position == "NET OPPOSE" ~ "Total unsupportive",
+    .default = Position))
+
+genderFrance <- francePoll |> select(men, women, position) |> 
+  filter(position != "Somewhat in favor") |>
+  filter(position != "quite in favor") |>
+  filter(position != "Somewhat opposed") |>
+  filter(position != "quite opposed") |>
+  mutate(Position = case_when(
+    position == "Total in favor" ~ "Total Supportive",
+    position == "No response" ~ "Neutral/Don't Know",
+    position == "Total opposed" ~ "Total unsupportive",
+    .default = position))
+
+genderUK <- UKYouGov |> select(Male, Female, Position)|> 
+  filter(Position != "Very Supportive") |>
+  filter(Position != "Supportive") |>
+  filter(Position != "Unsupportive") |>
+  filter(Position != "Very unsupportive") |>
+  mutate(Position = case_when(
+    Position == "Neither supportive or unsupportive" ~ "Neutral/Don't Know",
+    Position == "Don't know" ~ "Neutral/Don't Know",
+    .default = Position
+  ))
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+gender <- full_join(genderUK, genderUS, join_by(Position))
+gender <- full_join(gender, genderFrance) 
+colnames(gender) <- c("ukm", "ukf", "Position", "usm", "usf", "fm", "ff", "position")
+gender <- gender %>% select(-position)
+
+gender <- gender |> 
+  pivot_longer(!Position,
+  names_to = "Gender",
+  values_to = "Percentage"
+)
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ ggplot(gender, aes(x = Gender, y = Percentage, fill = Gender)) +
+  geom_col() +
+  facet_wrap(~Position, nrow = 1, labeller = label_wrap_gen(width = 12)) +
+  labs(title = "Men vs Women",
+       subtitle = "All Polls",
+       caption = "various sources",
+       x = NULL, y = NULL) +
+   scale_fill_discrete(labels = 
+    c("French Women", "French Men", "UK Women", "UK Men", "US Women", "US Men")) +
+   theme_minimal()
+ 
+ ggplot (gender, aes(y=Percentage, x=Gender, fill=Position)) + 
+  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
+  labs(title = "Men vs Women",
+       subtitle = "All polls",
+       caption = "various sources",
+       x = NULL, y = NULL, fill = NULL) +
+   scale_x_discrete(labels = c("French Women", "Men", "UK Women", "UK Men", "US Women", "US Men")) +
+   theme_minimal()
+```
+
 ```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
 
 franceCSP <- francePoll |> select(csp, csp_2, inactifs, position) |> pivot_longer(!position,
@@ -844,80 +918,6 @@ ggplot(ruralUrbanFrance, aes(y = Community, x = n, fill = position)) +
 ```
 
 Urban and rural areas did not vary greatly in support for the job guarantee. The greater Paris region had the lowest support at 79% in favor and 20% opposed.
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-genderUS <- Hill |> select(Male, Female, Position) |> 
-  filter(Position != "Strongly support") |>
-  filter(Position != "Somewhat support") |>
-  filter(Position != "Somewhat oppose") |>
-  filter(Position != "Strongly oppose") |>
-  mutate(Position = case_when(
-    Position == "NET SUPPORT" ~ "Total Supportive",
-    Position == "Unsure" ~ "Neutral/Don't Know",
-    Position == "NET OPPOSE" ~ "Total unsupportive",
-    .default = Position))
-
-genderFrance <- francePoll |> select(men, women, position) |> 
-  filter(position != "Somewhat in favor") |>
-  filter(position != "quite in favor") |>
-  filter(position != "Somewhat opposed") |>
-  filter(position != "quite opposed") |>
-  mutate(Position = case_when(
-    position == "Total in favor" ~ "Total Supportive",
-    position == "No response" ~ "Neutral/Don't Know",
-    position == "Total opposed" ~ "Total unsupportive",
-    .default = position))
-
-genderUK <- UKYouGov |> select(Male, Female, Position)|> 
-  filter(Position != "Very Supportive") |>
-  filter(Position != "Supportive") |>
-  filter(Position != "Unsupportive") |>
-  filter(Position != "Very unsupportive") |>
-  mutate(Position = case_when(
-    Position == "Neither supportive or unsupportive" ~ "Neutral/Don't Know",
-    Position == "Don't know" ~ "Neutral/Don't Know",
-    .default = Position
-  ))
-
-```
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
-gender <- full_join(genderUK, genderUS, join_by(Position))
-gender <- full_join(gender, genderFrance) 
-colnames(gender) <- c("ukm", "ukf", "Position", "usm", "usf", "fm", "ff", "position")
-gender <- gender %>% select(-position)
-
-gender <- gender |> 
-  pivot_longer(!Position,
-  names_to = "Gender",
-  values_to = "Percentage"
-)
-```
-
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-
- ggplot(gender, aes(x = Gender, y = Percentage, fill = Gender)) +
-  geom_col() +
-  facet_wrap(~Position, nrow = 1, labeller = label_wrap_gen(width = 12)) +
-  labs(title = "Men vs Women",
-       subtitle = "All olls",
-       caption = "various sources",
-       x = NULL, y = NULL) +
-   scale_fill_discrete(labels = 
-    c("French Women", "French Men", "UK Women", "UK Men", "US Women", "US Men")) +
-   theme_minimal()
- 
- ggplot (gender, aes(y=Percentage, x=Gender, fill=Position)) + 
-  geom_bar (stat="identity", position = position_dodge(width = 0.5)) +
-  labs(title = "Men vs Women",
-       subtitle = "All polls",
-       caption = "various sources",
-       x = NULL, y = NULL, fill = NULL) +
-   scale_x_discrete(labels = c("French Women", "Men", "UK Women", "UK Men", "US Women", "US Men")) +
-   theme_minimal()
-```
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 
