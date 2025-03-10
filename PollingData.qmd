@@ -151,12 +151,7 @@ ggplot (politicalPartyUK, aes(x=Party, y=Percentage, fill=Position)) +
        subtitle = "UKYouGov Survey",
        caption = "YouGov Plc. 2020. YouGov / NEON Survey Results.",
        x = NULL, y = NULL) +
-  scale_fill_manual(values = c(
-    "Don't know" = "gray",
-    "Neither supportive or unsupportive" = "black",
-    "Total Supportive" = "#5F8575",
-    "Total unsupportive" = "#C21E56"
-  )) +
+  scale_colour_viridis_d() +
   theme_minimal()
 
 politicalPartyUK |>
